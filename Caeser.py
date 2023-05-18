@@ -10,60 +10,74 @@ def generate_key(n):
 def encrypt(key, message):
     cipher = ""
     for char in message:
-        if char.isalpha():  # Process only alphabetical characters
-            encrypted_char = key.get(char.upper(), char).upper()  # Shift letter using the generated key and convert to uppercase
+        if char.isalpha():
+            encrypted_char = key.get(char.upper(), char).upper()
         else:
-            encrypted_char = char  # Preserve non-alphabetical characters
+            encrypted_char = char
         cipher += encrypted_char
     return cipher
 
-def decrypt(key, cipher):
-    decrypted_message = ""
-    for char in cipher:
-        if char.isalpha():  # Process only alphabetical characters
-            decrypted_char = key.get(char.upper(), char).upper()  # Reverse-shift letter using the generated key and convert to uppercase
-        else:
-            decrypted_char = char  # Preserve non-alphabetical characters
-        decrypted_message += decrypted_char
-    return decrypted_message
-
+def decrypt(ciphertext):
+    valid_messages = []
+    for key in range(26):
+        plaintext = ""
+        for char in ciphertext:
+            if char.isalpha():
+                if char.isupper():
+                    decrypted_char = chr((ord(char) - 65 - key) % 26 + 65)
+                else:
+                    decrypted_char = chr((ord(char) - 97 - key) % 26 + 97)
+            else:
+                decrypted_char = char
+            plaintext += decrypted_char
+        if all(char.isalpha() or char.isspace() for char in plaintext):
+            valid_messages.append(plaintext)
+    return valid_messages
 
 while True:
-    option_input = input("Please choose an option: (1) Encrypt, (2) Decrypt: ")
-    if option_input == "1" or option_input == "2":
+    print("Caesar Cipher Program")
+    print("1. Encrypt a message")
+    print("2. Decrypt a message")
+    print("3. Break the cipher")
+    print("4. Reset and start from the beginning")
+    print("5. Exit")
+    choice = input("Please choose an option (1-5): ")
+
+    if choice == "1":
+        key_input = input("Please input key: ")
+        try:
+            key = int(key_input)
+            message_input = input("Please input message: ")
+            key = generate_key(key)
+            cipher = encrypt(key, message_input)
+            print("\nEncrypted message:", cipher)
+            print()
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.\n")
+    elif choice == "2":
+        key_input = input("Please input key: ")
+        try:
+            key = int(key_input)
+            message_input = input("Please input message: ")
+            key = generate_key(-key)
+            plaintext = encrypt(key, message_input)
+            print("\nDecrypted message:", plaintext)
+            print()
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.\n")
+    elif choice == "3":
+        ciphertext = input("Please input ciphertext to break: ")
+        print("\nBrute-Force Decryption:")
+        valid_messages = decrypt(ciphertext)
+        if valid_messages:
+            for i, message in enumerate(valid_messages, start=1):
+                print("Valid decrypted message", i, ":", message)
+        else:
+            print("No valid decrypted messages found.")
+        print()
+    elif choice == "4":
+        continue
+    elif choice == "5":
         break
     else:
-        print("Invalid option. Please choose either 1 or 2.")
-
-if option_input == "1":
-    while True:
-        key_input = input("Please input key: ")
-        try:
-            key = int(key_input)
-            break  # Break the loop if the input is a valid integer
-        except ValueError:
-            print("Invalid input. Please enter a valid integer.")
-
-    message_input = input("Please input message: ")
-
-    key = generate_key(key)
-    cipher = encrypt(key, message_input)
-
-    print("\nMessage prior encryption:", message_input)
-    print("Message after encryption:", cipher)
-
-elif option_input == "2":
-    while True:
-        key_input = input("Please input key: ")
-        try:
-            key = int(key_input)
-            break  # Break the loop if the input is a valid integer
-        except ValueError:
-            print("Invalid input. Please enter a valid integer.")
-
-    cipher_input = input("Please input cipher text: ")
-
-    key = generate_key(-key)  # Negative key to perform reverse shift for decryption
-    decrypted_cipher = decrypt(key, cipher_input)
-
-    print("\nThe decrypted cipher message is:", decrypted_cipher)
+        print("Invalid choice. Please enter a valid option (1-5).\n")
